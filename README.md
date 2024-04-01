@@ -356,15 +356,6 @@ If the installable zip package is located within the local directory `~/installa
 The script will perform all the steps required to silently install the software within the SugarDockerized stack currently running.
 To know more about additional custom configuration parameters and actions that can be used/performed during the silent installation refer to [script build/silentinstall.sh](#buildsilentinstallsh).
 
-#### build/build.sh
-This script is most likely for Sugar Employees only.
-The script requires a clone of Sugar's git repository within `./data/app/Mango` with the `index.php` located within `./data/app/Mango/sugarcrm/index.php`.
-If we want to build the application version 10.0.0 Enterprise, the build command would be:
-```./utilities/build/build.sh ent 13.0.0```
-
-The script will perform all the steps necessary to build the current branch of the software and also perform its silent installation.
-To know more about additional custom configuration parameters and actions that can be used/performed during the silent installation refer to [script build/silentinstall.sh](#buildsilentinstallsh).
-
 #### build/silentinstall.sh
 The script is leveraged by both `installfromzip.sh` and `build/build.sh` to install silently Sugar on the current stack.
 This script allows a certain degree of flexibility by allowing the following customisations:
