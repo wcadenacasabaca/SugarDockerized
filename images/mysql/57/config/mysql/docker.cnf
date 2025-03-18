@@ -1,4 +1,5 @@
 [mysqld]
+log_bin_trust_function_creators=1
 skip-host-cache
 skip-name-resolve
 default-storage-engine=InnoDB
