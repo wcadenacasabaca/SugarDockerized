@@ -38,7 +38,8 @@ RUN set -ex \
     && a2ensite sugar
 
 RUN docker-php-ext-install mysqli \
-    && docker-php-ext-install bcmath \
+    && docker-php-ext-install pdo pdo_mysql \    
+	&& docker-php-ext-install bcmath \
     && docker-php-ext-install gd \
     && docker-php-ext-install gmp \
     && docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
