@@ -1,4 +1,4 @@
-version: '3'
+#version: '3'
 
 services:
     web1:
@@ -24,6 +24,8 @@ services:
             - mysql
             - elasticsearch
             - redis
+        networks:
+            - laravel-development       
     cron:
         container_name: "sugar-cron"
         image: sugar_php80_cron
@@ -52,6 +54,8 @@ services:
             - MYSQL_ROOT_PASSWORD=root
             - MYSQL_USER=sugar
             - MYSQL_PASSWORD=sugar
+        networks:
+            - laravel-development       
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
         container_name: "sugar-elasticsearch"
@@ -72,11 +76,15 @@ services:
             nofile:
                 soft: 65536
                 hard: 65536
+        networks:
+            - laravel-development           
     redis:
         container_name: "sugar-redis"
         image: redis:latest
         volumes:
             - ../../data/redis:/data
+        networks:
+            - laravel-development   
     permissions:
         container_name: "sugar-permissions"
         image: sugar_permissions
@@ -87,6 +95,80 @@ services:
         container_name: "sugar-smtp"
         image: sugar_testsmtp
         build: ../../images/testsmtp
+    # Laravel
+    # Basado en: https://docs.docker.com/guides/frameworks/laravel/
+    web-sugarapi:
+        image: nginx:latest # Using the default Nginx image with custom configuration.
+        volumes:
+        # Mount the application code for live updates
+            - ../../data/app/laravel/sugarAPI:/var/www
+        # Mount the Nginx configuration file
+            - ../../images/php/83/laravel/development/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        ports:
+        # Map port 80 inside the container to the port specified by 'NGINX_PORT' on the host machine
+            - "8081:80"
+        environment:
+            - NGINX_HOST=localhost
+        networks:
+            - laravel-development
+        depends_on:
+            php-fpm-sugarapi:
+                condition: service_started  # Wait for php-fpm to start
+
+    php-fpm-sugarapi:
+        # For the php-fpm service, we will create a custom image to install the necessary PHP extensions and setup proper permissions.
+        build:
+            context: "../../"
+            dockerfile: images/php/83/laravel/common/php-fpm/Dockerfile
+            target: development
+            args:
+                UID: ${UID:-1000}
+                GID: ${GID:-1000}
+                XDEBUG_ENABLED: ${XDEBUG_ENABLED:-true}
+                XDEBUG_MODE: develop,coverage,debug,profile
+                XDEBUG_HOST: ${XDEBUG_HOST:-host.docker.internal}
+                XDEBUG_IDE_KEY: ${XDEBUG_IDE_KEY:-DOCKER}
+                XDEBUG_LOG: /dev/stdout
+                XDEBUG_LOG_LEVEL: 0
+        env_file:
+            # Load the environment variables from the Laravel application
+            - ../../data/app/laravel/sugarAPI/.env
+        user: "${UID:-1000}:${GID:-1000}"
+        volumes:
+            # Mount the application code for live updates
+            - ../../data/app/laravel/sugarAPI:/var/www
+        networks:
+            - laravel-development
+        depends_on:
+            mysql:
+                condition: service_started  # Wait for postgres to start
+
+    workspace-sugarapi:
+    # For the workspace service, we will also create a custom image to install and setup all the necessary stuff.
+        build:
+            context: .
+            dockerfile: ../../images/php/83/laravel/development/workspace/Dockerfile
+            args:
+                UID: ${UID:-1000}
+                GID: ${GID:-1000}
+                XDEBUG_ENABLED: ${XDEBUG_ENABLED:-true}
+                XDEBUG_MODE: develop,coverage,debug,profile
+                XDEBUG_HOST: ${XDEBUG_HOST:-host.docker.internal}
+                XDEBUG_IDE_KEY: ${XDEBUG_IDE_KEY:-DOCKER}
+                XDEBUG_LOG: /dev/stdout
+                XDEBUG_LOG_LEVEL: 0
+        tty: true  # Enables an interactive terminal
+        stdin_open: true  # Keeps standard input open for 'docker exec'
+        env_file:
+            - ../../data/app/laravel/sugarAPI/.env
+        volumes:
+            - ../../data/app/laravel/sugarAPI/:/var/www
+        networks:
+            - laravel-development
+
+networks:
+  laravel-development:
+
 
 volumes:
     es-data01:
