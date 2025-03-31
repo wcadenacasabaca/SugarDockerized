@@ -42,6 +42,8 @@ services:
             - mysql
             - elasticsearch
             - redis
+        networks:
+            - laravel-development    
     mysql:
         container_name: "sugar-mysql"
         image: sugar_mysql
@@ -91,10 +93,14 @@ services:
         build: ../../images/permissions
         volumes:
             - ../../data/app:/var/www/html
+        networks:
+            - laravel-development    
     testsmtp:
         container_name: "sugar-smtp"
         image: sugar_testsmtp
         build: ../../images/testsmtp
+        networks:
+            - laravel-development
     # SSL/TLS    
     secureserver:
         image: 'docker.io/jc21/nginx-proxy-manager:latest'
@@ -108,8 +114,9 @@ services:
             - ../../data/secureserver/letsencrypt:/etc/letsencrypt    
         depends_on:
             - web1
+            - web-sugarapi
         networks:
-            - laravel-development      
+            - laravel-development
     # Laravel
     # Basado en: https://docs.docker.com/guides/frameworks/laravel/
     web-sugarapi:
