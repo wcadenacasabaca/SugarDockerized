@@ -6,7 +6,7 @@ services:
         image: sugar_php80_web
         build: ../../images/php/80/apache
         ports:
-            - "80:80"
+            - "8080:80"
         extra_hosts:
             - "docker.local:127.0.0.1"
         environment:
@@ -95,6 +95,21 @@ services:
         container_name: "sugar-smtp"
         image: sugar_testsmtp
         build: ../../images/testsmtp
+    # SSL/TLS    
+    secureserver:
+        image: 'docker.io/jc21/nginx-proxy-manager:latest'
+        restart: unless-stopped
+        ports:
+            - '80:80'
+            - '81:81'
+            - '443:443'
+        volumes:
+            - ../../data/secureserver/data:/data
+            - ../../data/secureserver/letsencrypt:/etc/letsencrypt    
+        depends_on:
+            - web1
+        networks:
+            - laravel-development      
     # Laravel
     # Basado en: https://docs.docker.com/guides/frameworks/laravel/
     web-sugarapi:

@@ -13,6 +13,8 @@ RUN apt-get update \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libxml2-dev \
+    libmemcached-dev \
+    zlib1g-dev \
     git \
     --no-install-recommends
 
@@ -48,8 +50,9 @@ RUN docker-php-ext-install mysqli \
     && docker-php-ext-install ldap \
 # cannot install latest Xdebug any longer on php 7.4 as it requires php 8+
     && pecl install xdebug-3.1.6 \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
+    && pecl install redis \    
+    && pecl install redis apcu memcached \
+    && docker-php-ext-enable redis apcu memcached \
     && docker-php-ext-install soap
 
 RUN docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
