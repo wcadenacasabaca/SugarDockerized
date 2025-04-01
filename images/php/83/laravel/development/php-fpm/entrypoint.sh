@@ -9,6 +9,11 @@ GROUP_ID=${GID:-1000}
 echo "Fixing file permissions with UID=${USER_ID} and GID=${GROUP_ID}..."
 chown -R ${USER_ID}:${GROUP_ID} /var/www || echo "Some files could not be changed"
 
+if [ ! -d "/var/www/vendor" ]; then
+  echo "vendor/ no encontrado. Ejecutando composer install..."
+  composer install --no-dev --optimize-autoloader
+fi
+
 # Clear configurations to avoid caching issues in development
 echo "Clearing configurations..."
 php artisan config:clear

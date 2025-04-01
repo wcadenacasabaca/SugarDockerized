@@ -68,18 +68,32 @@ FROM php:7.4-fpm AS production
 
 # Install only runtime libraries needed in production
 # libfcgi-bin and procps are required for the php-fpm-healthcheck script
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     libicu-dev \
     libzip-dev \
     libfcgi-bin \
     procps \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
     && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd
+
+RUN docker-php-ext-install mysqli \
+    && docker-php-ext-install pdo pdo_mysql \
+    && docker-php-ext-install bcmath
+    
 # Download and install php-fpm health check script
 RUN curl -o /usr/local/bin/php-fpm-healthcheck \
     https://raw.githubusercontent.com/renatomefi/php-fpm-healthcheck/master/php-fpm-healthcheck \
     && chmod +x /usr/local/bin/php-fpm-healthcheck
+
+# Install Composer and dependencies
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Copy the initialization script
 COPY images/php/83/laravel/development/php-fpm/entrypoint.sh /usr/local/bin/entrypoint.sh
@@ -89,6 +103,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 COPY data/app/laravel/sugarAPI/storage /var/www/storage-init
 
 # Copy PHP extensions and libraries from the builder stage
+COPY --from=builder /var/www/vendor /var/www/vendor
 COPY --from=builder /usr/local/lib/php/extensions/ /usr/local/lib/php/extensions/
 COPY --from=builder /usr/local/etc/php/conf.d/ /usr/local/etc/php/conf.d/
 COPY --from=builder /usr/local/bin/docker-php-ext-* /usr/local/bin/
@@ -172,6 +187,9 @@ RUN if getent group ${GID}; then \
 RUN sed -i "s/user = www-data/user = www/g" /usr/local/etc/php-fpm.d/www.conf && \
     sed -i "s/group = www-data/group = $group_name/g" /usr/local/etc/php-fpm.d/www.conf
 
+# Install Composer and dependencies
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+   
 
 # Set the working directory
 WORKDIR /var/www
@@ -179,6 +197,9 @@ WORKDIR /var/www
 # Copy the entrypoint script
 COPY images/php/83/laravel/development/php-fpm/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Copia Vendor
+COPY --from=builder /var/www/vendor /var/www/vendor
 
 # Switch back to the non-privileged user to run the application
 USER www-data
