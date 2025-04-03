@@ -82,4 +82,17 @@ RUN git clone https://github.com/longxinH/xhprof.git xhprof \
 
 COPY config/php/mods-available/xhprof.ini /usr/local/etc/php/conf.d/xhprof.ini
 
+# Important to enable providers
+RUN sed -i 's/^# providers = provider_sect/providers = provider_sect/' /etc/ssl/openssl.cnf 
+
+# Append the custom OpenSSL configuration to the existing openssl.cnf
+RUN echo 'providers = provider_sect' >> /etc/ssl/openssl.cnf && \
+    echo '[provider_sect]' >> /etc/ssl/openssl.cnf && \
+    echo 'default = default_sect' >> /etc/ssl/openssl.cnf && \
+    echo 'legacy = legacy_sect' >> /etc/ssl/openssl.cnf && \
+    echo '[default_sect]' >> /etc/ssl/openssl.cnf && \
+    echo 'activate = 1' >> /etc/ssl/openssl.cnf && \
+    echo '[legacy_sect]' >> /etc/ssl/openssl.cnf && \
+    echo 'activate = 1' >> /etc/ssl/openssl.cnf
+
 WORKDIR "/var/www/html/sugar"
