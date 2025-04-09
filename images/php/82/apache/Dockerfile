@@ -12,6 +12,8 @@ RUN apt-get update \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libxml2-dev \
+    libmemcached-dev \
+    zlib1g-dev \
     git \
     --no-install-recommends
 
@@ -37,6 +39,8 @@ RUN set -ex \
     && a2ensite sugar
 
 RUN docker-php-ext-install mysqli \
+    && docker-php-ext-install pdo pdo_mysql \
+    && docker-php-ext-install bcmath \
     && docker-php-ext-install bcmath \
     && docker-php-ext-install gd \
     && docker-php-ext-install gmp \
@@ -45,7 +49,9 @@ RUN docker-php-ext-install mysqli \
     && docker-php-ext-install zip \
     && docker-php-ext-install ldap \
     && pecl install xdebug-3.2.0 \
-    && pecl install redis \
+    && pecl install redis \    
+    && pecl install redis apcu memcached \
+    && docker-php-ext-enable redis apcu memcached \
     && docker-php-ext-enable redis \
     && docker-php-ext-install soap
 
