@@ -6,7 +6,7 @@ services:
         image: sugar_php80_web
         build: ../../images/php/80/apache
         ports:
-            - "8080:80"
+            - "8090:80"
         extra_hosts:
             - "docker.local:127.0.0.1"
         environment:
@@ -43,7 +43,30 @@ services:
             - elasticsearch
             - redis
         networks:
-            - laravel-development    
+            - laravel-development
+    web_sugar2:
+        container_name: "sugar-web-sugar2"
+        image: sugar_php80_web2
+        build: ../../images/php/80/apache_2
+        ports:
+            - "8081:80"        
+        environment:
+            - "APACHE_RUN_USER=sugar"
+            - "APACHE_RUN_GROUP=sugar"
+        volumes:
+            - ../../data/app/custom:/var/www/html
+            - ../../images/php/80/apache/config/php/docker.ini:/usr/local/etc/php/conf.d/docker.ini
+        depends_on:
+            - mysql
+            - elasticsearch
+            - redis
+            - permissions
+        links:
+            - mysql
+            - elasticsearch
+            - redis
+        networks:
+            - laravel-development          
     mysql:
         container_name: "sugar-mysql"
         image: sugar_mysql
@@ -130,7 +153,7 @@ services:
             - ../../images/php/83/laravel/development/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
         ports:
         # Map port 80 inside the container to the port specified by 'NGINX_PORT' on the host machine
-            - "8081:80"
+            - "8082:80"
         environment:
             - NGINX_HOST=localhost
         networks:
