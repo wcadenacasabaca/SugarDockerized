@@ -1,9 +1,15 @@
 #!/bin/bash
 
 # === Variables ===
-# Obtener la ruta base real (2 carpetas hacia arriba desde /utilities)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BASE_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+# Permitir pasar BASE_DIR y BACKUP_NAME como parámetros
+BASE_DIR=${1}
+BACKUP_NAME=${2}
+
+# Si no se pasa BASE_DIR, calcularlo automáticamente
+if [ -z "$BASE_DIR" ]; then
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  BASE_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+fi
 
 BACKUPS_DIR="$BASE_DIR/backups/configs"
 
@@ -19,10 +25,7 @@ restaurar_backup() {
     local ruta_relativa="${archivo_backup#$backup_path/data/app/}"
     local destino="$BASE_DIR/data/app/$ruta_relativa"
 
-    # Crear carpeta destino si no existe
     mkdir -p "$(dirname "$destino")"
-
-    # Restaurar archivo
     cp "$archivo_backup" "$destino"
     echo "✅ Archivo restaurado en: $destino"
   done
@@ -39,14 +42,16 @@ if [ ! -d "$BACKUPS_DIR" ]; then
   exit 1
 fi
 
-# Listar backups disponibles
-echo "📂 Backups disponibles:"
-ls -1 "$BACKUPS_DIR"
+# Si no pasaron nombre del backup como parámetro, preguntar
+if [ -z "$BACKUP_NAME" ]; then
+  echo "📂 Backups disponibles:"
+  ls -1 "$BACKUPS_DIR"
 
-echo ""
-read -rp "🛑 Ingresa el nombre del backup que deseas restaurar (ejemplo: 20250428_082503): " backup_seleccionado
+  echo ""
+  read -rp "🛑 Ingresa el nombre del backup que deseas restaurar (ejemplo: 20250428_082503): " BACKUP_NAME
+fi
 
-backup_path="$BACKUPS_DIR/$backup_seleccionado"
+backup_path="$BACKUPS_DIR/$BACKUP_NAME"
 
 # Verificar si el backup seleccionado existe
 if [ ! -d "$backup_path" ]; then
