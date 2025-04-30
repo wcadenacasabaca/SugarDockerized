@@ -95,4 +95,4 @@ RUN echo 'providers = provider_sect' >> /etc/ssl/openssl.cnf && \
     echo '[legacy_sect]' >> /etc/ssl/openssl.cnf && \
     echo 'activate = 1' >> /etc/ssl/openssl.cnf
 
-WORKDIR "/var/www/html/custom"
+WORKDIR "/var/www/html"
