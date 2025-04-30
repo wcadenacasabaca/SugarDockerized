@@ -54,7 +54,7 @@ services:
             - "APACHE_RUN_USER=sugar"
             - "APACHE_RUN_GROUP=sugar"
         volumes:
-            - ../../data/app/custom:/var/www/html
+            - ../../data/app/custom/custom:/var/www/html
             - ../../images/php/80/apache/config/php/docker.ini:/usr/local/etc/php/conf.d/docker.ini
         depends_on:
             - mysql
@@ -128,6 +128,7 @@ services:
             - laravel-development
     # SSL/TLS    
     secureserver:
+        container_name: "sugar-secureserver"
         image: 'docker.io/jc21/nginx-proxy-manager:latest'
         restart: unless-stopped
         ports:
@@ -145,6 +146,7 @@ services:
     # Laravel
     # Basado en: https://docs.docker.com/guides/frameworks/laravel/
     web-sugarapi:
+        container_name: "sugar-api-sugar"
         image: nginx:latest # Using the default Nginx image with custom configuration.
         volumes:
         # Mount the application code for live updates
