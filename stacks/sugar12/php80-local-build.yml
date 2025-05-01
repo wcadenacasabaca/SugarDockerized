@@ -215,6 +215,20 @@ services:
         networks:
             - laravel-development
 
+    quasar-app:
+        container_name: "sugar-quasar-app"
+        build:
+            context: ../../data/app/vue/app
+            dockerfile: ../../../../images/javascript/app/Dockerfile
+        volumes:
+            - ../../data/app/vue/app:/usr/src/app        
+        ports:
+            - "8089:9000"
+        environment:
+            - HOST=0.0.0.0
+        networks:
+            - laravel-development        
+
 networks:
   laravel-development:
 
