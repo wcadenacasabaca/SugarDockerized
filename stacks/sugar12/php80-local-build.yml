@@ -221,11 +221,24 @@ services:
         volumes:
             - ../../data/app/vue/app:/usr/src/app        
         ports:
-            - "8089:9000"
+            - "8089:443"
         environment:
             - HOST=0.0.0.0
         networks:
-            - laravel-development        
+            - laravel-development
+    quasar-balcon:
+        container_name: "sugar-quasar-balcon"
+        build:
+            context: ../../data/app/vue/balcon_de_servicios
+            dockerfile: ../../../../images/javascript/balcon/Dockerfile
+        volumes:
+            - ../../data/app/vue/balcon_de_servicios:/usr/src/app        
+        ports:
+            - "8092:9000"
+        environment:
+            - HOST=0.0.0.0
+        networks:
+            - laravel-development                
 
 networks:
   laravel-development:

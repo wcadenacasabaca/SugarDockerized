@@ -1,5 +1,5 @@
 # develop stage
-FROM node:18-alpine
+FROM node:20-alpine
 
 RUN npm install -g http-server
 
@@ -25,8 +25,8 @@ COPY . .
 # en caso de build
 # RUN quasar build
 # en caso de arrancar en linea...
-EXPOSE 443
-CMD ["quasar", "dev", "--hostname", "0.0.0.0", "--port", "443"]
+EXPOSE 9000
+CMD ["quasar", "dev", "--port", "9000"]
 
 # RUN mv dist build
 
